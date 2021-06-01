@@ -12,7 +12,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/breakdowns/slam-mirrorbot)
 [![Slam Mirror Support](https://img.shields.io/badge/slam%20mirror%20bot-support%20group-blue)](https://t.me/SlamMirrorSupport)
 
-**Slam Mirror Bot** is a Telegram Bot writen in Python for mirroring files on the Internet to our beloved Google Drive.
+**Slam Mirror Bot** is a multipurpose Telegram Bot writen in Python for mirroring files on the Internet to our beloved Google Drive.
 
 # Features supported:
 
@@ -26,7 +26,7 @@
 - Multiple Trackers support
 - Check Heroku dynos stats
 - Custom image support
-- Counting file/folders
+- Counting file/folder
 - Racaty.net support
 - Shell and Executor
 - Stickers module
@@ -161,7 +161,6 @@ Two buttons are already added of File Link and Index Link, you can add extra but
 </details>
 
 ## Getting Google OAuth API credential file
-
 - Visit the [Google Cloud Console](https://console.developers.google.com/apis/credentials)
 - Go to the OAuth Consent tab, fill it, and save.
 - Go to the Credentials tab and click Create Credentials -> OAuth Client ID

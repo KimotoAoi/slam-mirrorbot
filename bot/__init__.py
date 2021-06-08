@@ -129,11 +129,10 @@ app = Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_t
 
 #Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
-LOGGER.info("Generating Telegraph Token using '" + sname + "' name")
+LOGGER.info("Generating TELEGRAPH_TOKEN using '" + sname + "' name")
 telegraph = Telegraph()
 telegraph.create_account(short_name=sname)
 telegraph_token = telegraph.get_access_token()
-LOGGER.info("Telegraph Token Generated: '" + telegraph_token + "'")
 
 try:
     MEGA_API_KEY = getConfig('MEGA_API_KEY')
@@ -182,6 +181,12 @@ try:
         INDEX_URL = None
 except KeyError:
     INDEX_URL = None
+try:
+    CLONE_LIMIT = getConfig('CLONE_LIMIT')
+    if len(CLONE_LIMIT) == 0:
+        CLONE_LIMIT = None
+except KeyError:
+    CLONE_LIMIT = None
 try:
     BUTTON_FOUR_NAME = getConfig('BUTTON_FOUR_NAME')
     BUTTON_FOUR_URL = getConfig('BUTTON_FOUR_URL')

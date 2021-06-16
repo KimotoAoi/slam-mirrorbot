@@ -34,7 +34,7 @@ class AriaDownloadHelper(DownloadHelper):
                     smsg, button = gdrive.drive_list(sname)
                 if smsg:
                     dl.getListener().onDownloadError(f'Tệp/Thư mục đã có sẵn trong Drive.\n\n')
-                    sendMarkup("Here are the search results:", dl.getListener().bot, dl.getListener().update, button)
+                    sendMarkup("Dưới đây là kết quả tìm kiếm:", dl.getListener().bot, dl.getListener().update, button)
                     aria2.remove([download])
                     return
 

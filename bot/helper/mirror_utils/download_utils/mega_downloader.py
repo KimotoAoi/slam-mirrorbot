@@ -105,7 +105,7 @@ class MegaAppListener(MegaListener):
         filen = transfer.getFileName()
         state = transfer.getState()
         errStr = error.toString()
-        LOGGER.info(f'Mega download error in file {transfer} {filen}: {error}')
+        LOGGER.info(f'Lỗi tải xuống Mega trong tệp {transfer} {filen}: {error}')
 
         if state == 1 or state == 4:
             # Sometimes MEGA (offical client) can't stream a node either and raises a temp failed error.
@@ -119,7 +119,7 @@ class MegaAppListener(MegaListener):
 
     def cancel_download(self):
         self.is_cancelled = True
-        self.listener.onDownloadError("Download Canceled by user")
+        self.listener.onDownloadError("Người dùng đã dừng tải xuống")
 
 
 class AsyncExecutor:
@@ -166,7 +166,7 @@ class MegaDownloadHelper:
         if mega_listener.error is not None:
             return listener.onDownloadError(str(mega_listener.error))
         if STOP_DUPLICATE_MEGA:
-            LOGGER.info(f'Checking File/Folder if already in Drive')
+            LOGGER.info(f'Kiểm tra tệp/thư mục nếu đã có trong Drive')
             mname = node.getName()
             if listener.isTar:
                 mname = mname + ".tar"
@@ -177,7 +177,7 @@ class MegaDownloadHelper:
                 smsg, button = gd.drive_list(mname)
             if smsg:
                 deleteMessage(listener.bot, msg)
-                msg1 = "File/Folder is already available in Drive.\nHere are the search results:"
+                msg1 = "Tệp/Thư mục đã có sẵn trong Drive.\nĐây là kết quả tìm kiếm:"
                 sendMarkup(msg1, listener.bot, listener.update, button)
                 return
             else:

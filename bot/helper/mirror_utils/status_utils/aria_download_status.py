@@ -94,11 +94,11 @@ class AriaDownloadStatus(Status):
         return self.__gid
 
     def cancel_download(self):
-        LOGGER.info(f"Cancelling Download: {self.name()}")
+        LOGGER.info(f"Hủy tải xuống: {self.name()}")
         download = self.aria_download()
         if download.is_waiting:
             aria2.remove([download])
-            self.__listener.onDownloadError("Cancelled by user")
+            self.__listener.onDownloadError("Người dùng đã huỷ")
             return
         if len(download.followed_by_ids) != 0:
             downloads = aria2.get_downloads(download.followed_by_ids)

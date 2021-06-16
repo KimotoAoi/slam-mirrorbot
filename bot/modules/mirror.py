@@ -77,7 +77,7 @@ class MirrorListener(listeners.MirrorListeners):
             try:
                 path = fs_utils.get_base_name(m_path)
                 LOGGER.info(
-                    f"Extracting : {name} "
+                    f"Trích xuất : {name} "
                 )
                 with download_dict_lock:
                     download_dict[self.uid] = ExtractStatus(name, m_path, size)
@@ -148,7 +148,7 @@ class MirrorListener(listeners.MirrorListeners):
 
     def onUploadComplete(self, link: str, size, files, folders, typ):
         with download_dict_lock:
-            msg = f'<b>Filename: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
+            msg = f'<b>Tên tệp: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
             if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                 msg += '\n<b>Type: </b><code>Folder</code>'
                 msg += f'\n<b>Thư mục con: </b><code>{folders}</code>'

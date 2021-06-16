@@ -22,7 +22,7 @@ class AriaDownloadHelper(DownloadHelper):
             download = api.get_download(gid)
             
             if STOP_DUPLICATE_MIRROR:
-                LOGGER.info(f"Checking File/Folder if already in Drive...")
+                LOGGER.info(f"Kiểm tra tệp/thư mục nếu đã có trong Drive...")
                 self.name = download.name
                 sname = download.name
                 if self.listener.isTar:
@@ -33,13 +33,13 @@ class AriaDownloadHelper(DownloadHelper):
                     gdrive = GoogleDriveHelper(None)
                     smsg, button = gdrive.drive_list(sname)
                 if smsg:
-                    dl.getListener().onDownloadError(f'File/Folder is already available in Drive.\n\n')
+                    dl.getListener().onDownloadError(f'Tệp/Thư mục đã có sẵn trong Drive.\n\n')
                     sendMarkup("Here are the search results:", dl.getListener().bot, dl.getListener().update, button)
                     aria2.remove([download])
                     return
 
             if TORRENT_DIRECT_LIMIT is not None:
-                LOGGER.info(f"Checking File/Folder Size...")
+                LOGGER.info(f"Kiểm tra kích thước tệp/thư mục...")
                 sleep(1.5)
                 size = aria2.get_download(gid).total_length
                 limit = TORRENT_DIRECT_LIMIT
@@ -78,13 +78,13 @@ class AriaDownloadHelper(DownloadHelper):
     def __onDownloadPause(self, api, gid):
         LOGGER.info(f"onDownloadPause: {gid}")
         dl = getDownloadByGid(gid)
-        dl.getListener().onDownloadError('Download stopped by user!')
+        dl.getListener().onDownloadError('Người dùng đã dừng tải xuống!')
 
     @new_thread
     def __onDownloadStopped(self, api, gid):
         LOGGER.info(f"onDownloadStop: {gid}")
         dl = getDownloadByGid(gid)
-        if dl: dl.getListener().onDownloadError('Dead torrent!')
+        if dl: dl.getListener().onDownloadError('Torrent chết!')
 
     @new_thread
     def __onDownloadError(self, api, gid):

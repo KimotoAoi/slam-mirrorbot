@@ -409,7 +409,7 @@ class GoogleDriveHelper:
             if "User rate limit exceeded." in str(err):
                 msg = "User rate limit exceeded."
             elif "File not found" in str(err):
-                msg = "File not found."
+                msg = "Không tìm thấy tệp."
             else:
                 msg = f"Error.\n{err}"
             return msg, ""
@@ -669,7 +669,7 @@ class GoogleDriveHelper:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
             if "File not found" in str(err):
-                msg = "File not found."
+                msg = "Không tìm thấy tệp."
             else:
                 msg = f"Error.\n{err}"
             return msg
@@ -722,7 +722,7 @@ class GoogleDriveHelper:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
             if "File not found" in str(err):
-                msg = "File not found."
+                msg = "Không tìm thấy tệp."
             else:
                 msg = f"Error.\n{err}"
             return msg, "", ""

@@ -144,7 +144,7 @@ class MegaDownloadHelper:
         if MEGA_API_KEY is None:
             raise MegaDownloaderException('Mega API KEY not provided! Cannot mirror Mega links')
         if STOP_DUPLICATE_MEGA or MEGA_LIMIT is not None:
-            msg = sendMessage('Checking Your Link...', listener.bot, listener.update)
+            msg = sendMessage('Kiểm tra liên kết của bạn...', listener.bot, listener.update)
         executor = AsyncExecutor()
         api = MegaApi(MEGA_API_KEY, None, None, 'telegram-mirror-bot')
         global listeners

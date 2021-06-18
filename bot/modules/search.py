@@ -6,10 +6,9 @@ import aiohttp
 import json
 import feedparser
 import requests
-import itertools
 
-from telegram.ext import CommandHandler
-from telegram import ParseMode
+#from telegram.ext import CommandHandler
+#from telegram import ParseMode
 
 from urllib.parse import quote as urlencode, urlsplit
 
@@ -18,11 +17,18 @@ from pyrogram.parser import html as pyrogram_html
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 
-from bot import app, dispatcher, IMAGE_URL
+from bot import app, IMAGE_URL, AUTHORIZED_CHATS, OWNER_ID, getConfig
+#from bot import dispatcher 
 from bot.helper import custom_filters
 from bot.helper.telegram_helper.filters import CustomFilters
 
-session = aiohttp.ClientSession()
+try:
+    BOT_USERNAME = getConfig('BOT_USERNAME')
+    if len(BOT_USERNAME) == 0:
+        BOT_USERNAME = ''
+except KeyError:
+    BOT_USERNAME = ''
+    
 search_lock = asyncio.Lock()
 search_info = {False: dict(), True: dict()}
 
@@ -34,8 +40,9 @@ async def return_search(query, page=1, sukebei=False):
         results, get_time = used_search_info.get(query, (None, 0))
         if (time.time() - get_time) > 3600:
             results = []
-            async with session.get(f'https://{"sukebei." if sukebei else ""}nyaa.si/?page=rss&q={urlencode(query)}') as resp:
-                d = feedparser.parse(await resp.text())
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'https://{"sukebei." if sukebei else ""}nyaa.si/?page=rss&q={urlencode(query)}') as resp:
+                    d = feedparser.parse(await resp.text())
             text = ''
             a = 0
             parser = pyrogram_html.HTML(None)
@@ -147,8 +154,16 @@ async def nyaa_callback(client, callback_query):
             ignore.add(message_identifier)
     await callback_query.answer()
 
-# Using upstream API based on: https://github.com/Ryuk-me/Torrents-Api
+# Using Upstream API based on: https://github.com/Ryuk-me/Torrents-Api
 # Implemented by https://github.com/jusidama18
+
+# Link from Upstream APIs
+try:
+    TORRENT_API_URL = getConfig('TORRENT_API_URL')
+    if len(TORRENT_API_URL) == 0:
+        TORRENT_API_URL = 'https://torrenter-api.herokuapp.com'
+except KeyError:
+    TORRENT_API_URL = 'https://torrenter-api.herokuapp.com'
 
 class TorrentSearch:
     index = 0
@@ -157,7 +172,7 @@ class TorrentSearch:
     response = None
     response_range = None
 
-    RESULT_LIMIT = 4
+    RESULT_LIMIT = 5
     RESULT_STR = None
 
     def __init__(self, command: str, source: str, result_str: str):
@@ -165,7 +180,7 @@ class TorrentSearch:
         self.source = source.rstrip('/')
         self.RESULT_STR = result_str
 
-        app.add_handler(MessageHandler(self.find, filters.command([command])))
+        app.add_handler(MessageHandler(self.find, filters.command([command, f'{self.command}{BOT_USERNAME}'])))
         app.add_handler(CallbackQueryHandler(self.previous, filters.regex(f"{self.command}_previous")))
         app.add_handler(CallbackQueryHandler(self.delete, filters.regex(f"{self.command}_delete")))
         app.add_handler(CallbackQueryHandler(self.next, filters.regex(f"{self.command}_next")))
@@ -173,14 +188,18 @@ class TorrentSearch:
     def get_formatted_string(self, values):
         string = self.RESULT_STR.format(**values)
         magnet = values.get('magnet', values.get('Magnet'))  # Avoid updating source dict
+        down1 = values.get('Dwnload1') # Avoid updating source dict
+        down2 = values.get('Download2') # Avoid updating source dict
         if (magnet):
             string += f"➲Magnet: `{magnet.split('&tr', 1)[0]}`"
+        elif (down1) or (down2):
+            string += f"➲First Link: `{down1[0]}`\n\n➲Second Link: `{down2[0]}"
         return string
 
     async def update_message(self):
-        prevBtn = InlineKeyboardButton(f"Prev", callback_data=f"{self.command}_previous")
+        prevBtn = InlineKeyboardButton(f"𝗣𝗿𝗲𝘃", callback_data=f"{self.command}_previous")
         delBtn = InlineKeyboardButton(f"{emoji.CROSS_MARK}", callback_data=f"{self.command}_delete")
-        nextBtn = InlineKeyboardButton(f"Next", callback_data=f"{self.command}_next")
+        nextBtn = InlineKeyboardButton(f"𝗡𝗲𝘅𝘁", callback_data=f"{self.command}_next")
 
         inline = []
         if (self.index != 0):
@@ -189,8 +208,8 @@ class TorrentSearch:
         if (self.index != len(self.response_range) - 1):
             inline.append(nextBtn)
 
-        result = f"**Page - {self.index+1}**\n\n"
-        result += "\n\n=======================\n\n".join(
+        result = f"**📕 Page - {self.index+1}**\n\n"
+        result += "\n\n════════════ 𝙏𝙊𝙍𝙍𝙀𝙉𝙏 ═════════════\n\n".join(
             self.get_formatted_string(self.response[self.response_range[self.index]+i])
             for i in range(self.RESULT_LIMIT)
         )
@@ -241,66 +260,93 @@ class TorrentSearch:
 
 RESULT_STR_1337 = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeders}` || ➲Leechers: `{Leechers}`\n"
 )
 RESULT_STR_PIRATEBAY = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeders}` || ➲Leechers: `{Leechers}`\n"
 )
 RESULT_STR_TGX = (
     "➲Name: `{Name}`\n" 
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeders}` || ➲Leechers: `{Leechers}`\n"
+    "➲Torrent: `{TorrentLink}`\n"
 )
 RESULT_STR_YTS = (
     "➲Name: `{Name}`\n"
-    "➲1st Link: `{Dwnload1}`\n"
-    "➲2nd Link: `{Download2}`"
+    "➲Genre: `{Genre}` || ➲Rating: `{Rating}`\n"
+    "➲Duration: `{Runtime}`\n"
+    "➲Released Date: `{ReleasedDate}`\n"
 )
 RESULT_STR_EZTV = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeds}\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeds}`\n"
     "➲Torrent: `{Torrent}`\n"
 )
 RESULT_STR_TORLOCK = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeds} || ➲Leechers: {Peers}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeds}` || ➲Leechers: `{Peers}`\n"
     "➲Torrent: `{Torrent}`\n"
 )
 RESULT_STR_RARBG = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
     "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+)
+RESULT_STR_NYAASI = (
+    "➲Name: `{Name}`\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeder}` || ➲Leechers: `{Leecher}`\n"
+    "➲Torrent: `{TorrentLink}`\n"
+
 )
 RESULT_STR_ALL = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Category: `{Category}`\n"
+    "➲Size: `{Size}`\n"
+    "➲Seeders: `{Seeders}` || ➲Leechers: `{Leechers}`\n"
 )
 
 torrents_dict = {
-    '1337x': {'source': "https://torrenter-api.herokuapp.com/api/1337x/", 'result_str': RESULT_STR_1337},
-    'piratebay': {'source': "https://torrenter-api.herokuapp.com/api/piratebay/", 'result_str': RESULT_STR_PIRATEBAY},
-    'tgx': {'source': "https://torrenter-api.herokuapp.com/api/tgx/", 'result_str': RESULT_STR_TGX},
-    'yts': {'source': "https://torrenter-api.herokuapp.com/api/yts/", 'result_str': RESULT_STR_YTS},
-    'eztv': {'source': "https://torrenter-api.herokuapp.com/api/eztv/", 'result_str': RESULT_STR_EZTV},
-    'torlock': {'source': "https://torrenter-api.herokuapp.com/api/torlock/", 'result_str': RESULT_STR_TORLOCK},
-    'rarbg': {'source': "https://torrenter-api.herokuapp.com/api/rarbg/", 'result_str': RESULT_STR_RARBG},
-    'ts': {'source': "https://torrenter-api.herokuapp.com/api/all/", 'result_str': RESULT_STR_ALL}
+    '1337x': {'source': f"{TORRENT_API_URL}/api/1337x/", 'result_str': RESULT_STR_1337},
+    'piratebay': {'source': f"{TORRENT_API_URL}/api/piratebay/", 'result_str': RESULT_STR_PIRATEBAY},
+    'tgx': {'source': f"{TORRENT_API_URL}/api/tgx/", 'result_str': RESULT_STR_TGX},
+    'yts': {'source': f"{TORRENT_API_URL}/api/yts/", 'result_str': RESULT_STR_YTS},
+    'eztv': {'source': f"{TORRENT_API_URL}/api/eztv/", 'result_str': RESULT_STR_EZTV},
+    'torlock': {'source': f"{TORRENT_API_URL}/api/torlock/", 'result_str': RESULT_STR_TORLOCK},
+    'rarbg': {'source': f"{TORRENT_API_URL}/api/rarbg/", 'result_str': RESULT_STR_RARBG},
+    'nyaasi': {'source': f"{TORRENT_API_URL}/api/rarbg/", 'result_str': RESULT_STR_RARBG}, # For Alternative Search For Nyaa.si
+    'ts': {'source': f"{TORRENT_API_URL}/api/all/", 'result_str': RESULT_STR_ALL}
 }
 
 torrent_handlers = []
 for command, value in torrents_dict.items():
     torrent_handlers.append(TorrentSearch(command, value['source'], value['result_str']))
 
-def searchhelp(update, context):
+T_HELP = ['tshelp', 'find', 'ts']
+
+@app.on_message(filters.command(T_HELP, f'{T_HELP}{BOT_USERNAME}'))
+def searchhelp(client, message):
     help_string = '''
+<b>Example Usage:</b> <code>/nyaa naruto</code>
+
+<b>[   NYAA SI RSS   ]</b>
+
 • /nyaa <i>[search query]</i>
 • /sukebei <i>[search query]</i>
+
+<b>[ TORRENT APIs ]</b>
+
 • /1337x <i>[search query]</i>
 • /piratebay <i>[search query]</i>
 • /tgx <i>[search query]</i>
@@ -308,10 +354,16 @@ def searchhelp(update, context):
 • /eztv <i>[search query]</i>
 • /torlock <i>[search query]</i>
 • /rarbg <i>[search query]</i>
-• /ts <i>[search query]</i>
+• /nyaasi <i>[search query]</i>
+• /torrent <i>[search query]</i>
 '''
-    update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
+    message.reply_photo(photo=IMAGE_URL, caption=help_string, parse_mode="html", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(f"{emoji.CROSS_MARK}", callback_data='delete_end')]]))
+
+@app.on_callback_query(filters.regex('^delete_'))
+async def delete_button(_, query):
+    data = query.data.split('_')[1]
+    if data == 'end':
+        return await query.message.delete()
     
-    
-SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=(CustomFilters.authorized_chat | CustomFilters.authorized_user) & CustomFilters.mirror_owner_filter, run_async=True)
-dispatcher.add_handler(SEARCHHELP_HANDLER)
+#SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+#dispatcher.add_handler(SEARCHHELP_HANDLER)

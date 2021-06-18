@@ -217,6 +217,7 @@ class TorrentSearch:
             await self.message.edit(f"No Results Found.")
             return
         await self.update_message()
+        session.close()
 
     async def delete(self, client, message):
         index = 0
@@ -307,5 +308,5 @@ def searchhelp(update, context):
     update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
     
     
-SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=(CustomFilters.authorized_chat | CustomFilters.authorized_user) & CustomFilters.mirror_owner_filter, run_async=True)
+SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 dispatcher.add_handler(SEARCHHELP_HANDLER)

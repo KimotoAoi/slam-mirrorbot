@@ -6,6 +6,7 @@ import aiohttp
 import json
 import feedparser
 import requests
+import itertools
 
 from telegram.ext import CommandHandler
 from telegram import ParseMode
@@ -87,7 +88,7 @@ async def nyaa_search_sukebei(client, message):
 async def init_search(client, message, query, sukebei):
     result, pages, ttl = await return_search(query, sukebei=sukebei)
     if not result:
-        await message.reply_text('No results found')
+        await message.reply_text('Không có kết quả nào được tìm thấy')
     else:
         buttons = [InlineKeyboardButton(f'1/{pages}', 'nyaa_nop'), InlineKeyboardButton(f'Next', 'nyaa_next')]
         if pages == 1:
@@ -209,15 +210,18 @@ class TorrentSearch:
         self.message = await message.reply_text("Searching")
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{self.source}/{query}") \
-                        as resp:
-                    self.response = await resp.json(content_type=None)
+                async with session.get(f"{self.source}/{query}") as resp:
+                    if (resp.status != 200):
+                        raise Exception('yêu cầu không thành công')
+                    result = await resp.json()
+                    if (result and isinstance(result[0], list)):
+                        result = list(itertools.chain(*result))
+                    self.response = result
                     self.response_range = range(0, len(self.response), self.RESULT_LIMIT)
-        except Exception as exc:
-            await self.message.edit(f"No Results Found.")
+        except:
+            await self.message.edit("Không có kết quả nào được tìm thấy.")
             return
         await self.update_message()
-        session.close()
 
     async def delete(self, client, message):
         index = 0
@@ -259,12 +263,14 @@ RESULT_STR_YTS = (
 RESULT_STR_EZTV = (
     "➲Name: `{Name}`\n"
     "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Seeders: {Seeds}\n"
+    "➲Torrent: `{Torrent}`\n"
 )
 RESULT_STR_TORLOCK = (
     "➲Name: `{Name}`\n"
     "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
+    "➲Seeders: {Seeds} || ➲Leechers: {Peers}\n"
+    "➲Torrent: `{Torrent}`\n"
 )
 RESULT_STR_RARBG = (
     "➲Name: `{Name}`\n"
@@ -308,5 +314,5 @@ def searchhelp(update, context):
     update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
     
     
-SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=(CustomFilters.authorized_chat | CustomFilters.authorized_user) & CustomFilters.mirror_owner_filter, run_async=True)
 dispatcher.add_handler(SEARCHHELP_HANDLER)

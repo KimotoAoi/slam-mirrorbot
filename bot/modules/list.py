@@ -11,14 +11,14 @@ def list_drive(update, context):
     try:
         search = update.message.text.split(' ',maxsplit=1)[1]
         LOGGER.info(f"Searching: {search}")
-        reply = sendMessage('Searching..... Please wait!', context.bot, update)
+        reply = sendMessage('Đang tìm kiếm.....Vui lòng đợi!', context.bot, update)
         gdrive = GoogleDriveHelper(None)
         msg, button = gdrive.drive_list(search)
 
         if button:
             editMessage(msg, reply, button)
         else:
-            editMessage('No result found', reply, button)
+            editMessage('Không có kết quả nào', reply, button)
 
     except IndexError:
         sendMessage('Gửi một từ khoá tìm kiếm cùng với lệnh', context.bot, update)

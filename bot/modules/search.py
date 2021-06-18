@@ -88,7 +88,7 @@ async def nyaa_search_sukebei(client, message):
 async def init_search(client, message, query, sukebei):
     result, pages, ttl = await return_search(query, sukebei=sukebei)
     if not result:
-        await message.reply_text('Không có kết quả nào được tìm thấy')
+        await message.reply_text('No results found')
     else:
         buttons = [InlineKeyboardButton(f'1/{pages}', 'nyaa_nop'), InlineKeyboardButton(f'Next', 'nyaa_next')]
         if pages == 1:
@@ -212,14 +212,14 @@ class TorrentSearch:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.source}/{query}") as resp:
                     if (resp.status != 200):
-                        raise Exception('yêu cầu không thành công')
+                        raise Exception('unsuccessful request')
                     result = await resp.json()
                     if (result and isinstance(result[0], list)):
                         result = list(itertools.chain(*result))
                     self.response = result
                     self.response_range = range(0, len(self.response), self.RESULT_LIMIT)
         except:
-            await self.message.edit("Không có kết quả nào được tìm thấy.")
+            await self.message.edit("No Results Found.")
             return
         await self.update_message()
 
@@ -255,8 +255,6 @@ RESULT_STR_TGX = (
 )
 RESULT_STR_YTS = (
     "➲Name: `{Name}`\n"
-    "➲Size: {Size}\n"
-    "➲Seeders: {Seeders} || ➲Leechers: {Leechers}\n"
     "➲1st Link: `{Dwnload1}`\n"
     "➲2nd Link: `{Download2}`"
 )

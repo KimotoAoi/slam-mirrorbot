@@ -34,8 +34,8 @@ class AriaDownloadHelper(DownloadHelper):
                     smsg, button = gdrive.drive_list(sname)
                 if smsg:
                     aria2.remove([download])
-                    dl.getListener().onDownloadError(f'File/Folder is already available in Drive.\n\n')
-                    sendMarkup("Here are the search results:", dl.getListener().bot, dl.getListener().update, button)
+                    dl.getListener().onDownloadError(f'Tệp/Thư mục đã có sẵn trong Drive.\n\n')
+                    sendMarkup("Đây là kết quả tìm kiếm:", dl.getListener().bot, dl.getListener().update, button)
                     return
 
             if TORRENT_DIRECT_LIMIT is not None:

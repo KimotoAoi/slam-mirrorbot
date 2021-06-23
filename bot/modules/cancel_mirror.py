@@ -28,7 +28,7 @@ def cancel_mirror(update, context):
             except:
                 pass
     if len(args) == 1:
-        msg = f"Please reply to the <code>/{BotCommands.MirrorCommand}</code> message which was used to start the download or send <code>/{BotCommands.CancelMirror} GID</code> to cancel it!"
+        msg = f"Vui lòng trả lời <code>/{BotCommands.MirrorCommand}</code> tin nhắn được sử dụng để bắt đầu tải xuống hoặc gửi <code>/{BotCommands.CancelMirror} GID</code> để hủy bỏ nó!"
         if mirror_message and mirror_message.message_id not in keys:
             if BotCommands.MirrorCommand in mirror_message.text or \
                BotCommands.TarMirrorCommand in mirror_message.text or \

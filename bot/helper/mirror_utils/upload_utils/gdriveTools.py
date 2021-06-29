@@ -132,7 +132,7 @@ class GoogleDriveHelper:
             msg = "Successfully deleted"
         except HttpError as err:
             LOGGER.error(str(err))
-            if "Không tìm thấy tệp" in str(err):
+            if "File not found" in str(err):
                 msg = "No such file exist"
             else:
                 msg = "Something went wrong check log"
@@ -429,8 +429,8 @@ class GoogleDriveHelper:
                     return msg, InlineKeyboardMarkup(buttons.build_menu(2))
                 else:
                     msg = "User rate limit exceeded."
-            elif "Không tìm thấy tệp" in str(err):
-                msg = "Không tìm thấy tệp."
+            elif "File not found" in str(err):
+                msg = "File not found."
             else:
                 msg = f"Error.\n{err}"
             return msg, ""
@@ -678,8 +678,8 @@ class GoogleDriveHelper:
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            if "Không tìm thấy tệp" in str(err):
-                msg = "Không tìm thấy tệp."
+            if "File not found" in str(err):
+                msg = "File not found."
             else:
                 msg = f"Error.\n{err}"
             return msg
@@ -728,8 +728,8 @@ class GoogleDriveHelper:
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            if "Không tìm thấy tệp" in str(err):
-                msg = "Không tìm thấy tệp."
+            if "File not found" in str(err):
+                msg = "File not found."
             else:
                 msg = f"Error.\n{err}"
             return msg, "", ""

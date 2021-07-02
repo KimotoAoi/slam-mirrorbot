@@ -35,13 +35,13 @@ def stats(update, context):
     cpuUsage = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    stats = f'<b>🕛Bot Uptime:</b> {currentTime}\n' \
-            f'<b>⏳Start Time:</b> {current}\n' \
+    stats = f'<b>Bot Uptime:</b> {currentTime}\n' \
+            f'<b>Start Time:</b> {current}\n' \
             f'<b>Total Disk Space:</b> {total}\n' \
             f'<b>Used:</b> {used}  ' \
             f'<b>Free:</b> {free}\n\n' \
-            f'📊Data Usage📊\n<b>📤Upload:</b> {sent}\n' \
-            f'<b>📥Download:</b> {recv}\n\n' \
+            f'📊Data Usage📊\n<b>Upload:</b> {sent}\n' \
+            f'<b>Download:</b> {recv}\n\n' \
             f'<b>CPU:</b> {cpuUsage}%\n' \
             f'<b>RAM:</b> {memory}%\n' \
             f'<b>DISK:</b> {disk}%'
@@ -99,8 +99,6 @@ def bot_help(update, context):
 
 /{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
 
-/{BotCommands.TargdCommand} [drivefolder_url]: Create Tar of Google Drive folder
-
 /{BotCommands.CloneCommand}: Copy file/folder to Google Drive
 
 /{BotCommands.CountCommand}: Count file/folder of Google Drive Links
@@ -155,8 +153,6 @@ def bot_help(update, context):
 
 /{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
 
-/{BotCommands.TargdCommand} [drivefolder_url]: Create Tar of Google Drive folder
-
 /{BotCommands.CloneCommand}: Copy file/folder to Google Drive
 
 /{BotCommands.CountCommand}: Count file/folder of Google Drive Links
@@ -189,7 +185,6 @@ def bot_help(update, context):
 botcmds = [
 BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
 BotCommand(f'{BotCommands.TarMirrorCommand}','Upload tar (zipped) file'),
-BotCommand(f'{BotCommands.TargdCommand}','Create Tar of Google Drive folder'),
 BotCommand(f'{BotCommands.UnzipMirrorCommand}','Extract files'),
 BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
 BotCommand(f'{BotCommands.CountCommand}','Count file/folder of Drive link'),

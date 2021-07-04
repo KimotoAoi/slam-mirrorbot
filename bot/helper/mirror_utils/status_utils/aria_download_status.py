@@ -101,6 +101,5 @@ class AriaDownloadStatus(Status):
         if len(download.followed_by_ids) != 0:
             downloads = aria2.get_downloads(download.followed_by_ids)
             aria2.remove(downloads)
-            self.__listener.onDownloadError("Người dùng đã dừng tải xuống!")
-        aria2.remove([download])
         self.__listener.onDownloadError("Người dùng đã dừng tải xuống!")
+        aria2.remove([download])

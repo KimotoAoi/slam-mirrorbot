@@ -101,6 +101,7 @@ try:
     schats = getConfig('SUDO_USERS')
     schats = schats.split(" ")
     for chats in schats:
+        AUTHORIZED_CHATS.add(int(line.split()[0]))
         SUDO_USERS.add(int(chats))
 except:
     pass

@@ -77,7 +77,7 @@ def cloneNode(update, context):
                 delete_all_messages()
             else:
                 update_all_messages()
-        except IndexError:
+        except (IndexError, KeyError):
             pass
     else:
         sendMessage('Cung cấp liên kết chia sẻ công khai trên G-Drive để sao chép.', context.bot, update)

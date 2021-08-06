@@ -3,12 +3,13 @@ from telegram.ext import CommandHandler
 from telegram import InlineKeyboardMarkup
 
 from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2
-from bot import dispatcher, DOWNLOAD_DIR, DOWNLOAD_STATUS_UPDATE_INTERVAL, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, TAR_UNZIP_LIMIT
+from bot import dispatcher, DOWNLOAD_DIR, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, TAR_UNZIP_LIMIT
 from bot.helper.ext_utils import fs_utils, bot_utils
-from bot.helper.ext_utils.bot_utils import setInterval, get_mega_link_type
+from bot.helper.ext_utils.bot_utils import get_mega_link_type
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException, NotSupportedExtractionArchive
 from bot.helper.mirror_utils.download_utils.aria2_download import AriaDownloadHelper
 from bot.helper.mirror_utils.download_utils.mega_downloader import MegaDownloadHelper
+from bot.helper.mirror_utils.download_utils.qbit_downloader import qbittorrent
 from bot.helper.mirror_utils.download_utils.direct_link_generator import direct_link_generator
 from bot.helper.mirror_utils.download_utils.telegram_downloader import TelegramDownloadHelper
 from bot.helper.mirror_utils.status_utils import listeners
@@ -59,7 +60,7 @@ class MirrorListener(listeners.MirrorListeners):
 
     def onDownloadComplete(self):
         with download_dict_lock:
-            LOGGER.info(f"Tải hoàn tất: {download_dict[self.uid].name()}")
+            LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
             name = download.name()
             gid = download.gid()
@@ -82,7 +83,7 @@ class MirrorListener(listeners.MirrorListeners):
             try:
                 path = fs_utils.get_base_name(m_path)
                 LOGGER.info(
-                    f"Trích xuất : {name} "
+                    f"Extracting: {name} "
                 )
                 with download_dict_lock:
                     download_dict[self.uid] = ExtractStatus(name, m_path, size)
@@ -93,12 +94,12 @@ class MirrorListener(listeners.MirrorListeners):
                     archive_result = subprocess.run(["extract", m_path])
                 if archive_result.returncode == 0:
                     threading.Thread(target=os.remove, args=(m_path,)).start()
-                    LOGGER.info(f"Deleting archive : {m_path}")
+                    LOGGER.info(f"Deleting archive: {m_path}")
                 else:
                     LOGGER.warning('Unable to extract archive! Uploading anyway')
                     path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
                 LOGGER.info(
-                    f'got path : {path}'
+                    f'got path: {path}'
                 )
 
             except NotSupportedExtractionArchive:
@@ -110,7 +111,7 @@ class MirrorListener(listeners.MirrorListeners):
         up_path = f'{DOWNLOAD_DIR}{self.uid}/{up_name}'
         if up_name == "None":
             up_name = "".join(os.listdir(f'{DOWNLOAD_DIR}{self.uid}/'))
-        LOGGER.info(f"Upload Name : {up_name}")
+        LOGGER.info(f"Upload Name: {up_name}")
         drive = gdriveTools.GoogleDriveHelper(up_name, self)
         size = fs_utils.get_path_size(up_path)
         upload_status = UploadStatus(drive, size, gid, self)
@@ -135,7 +136,7 @@ class MirrorListener(listeners.MirrorListeners):
             uname = f"@{self.message.from_user.username}"
         else:
             uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
-        msg = f"{uname} Tải xuống của bạn đã bị dừng do: {error}"
+        msg = f"{uname} your download has been stopped due to: {error}"
         sendMessage(msg, self.bot, self.update)
         if count == 0:
             self.clean()
@@ -150,11 +151,11 @@ class MirrorListener(listeners.MirrorListeners):
 
     def onUploadComplete(self, link: str, size, files, folders, typ):
         with download_dict_lock:
-            msg = f'<b>Tên tệp: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
+            msg = f'<b>Filename: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
             if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                 msg += '\n<b>Type: </b><code>Folder</code>'
-                msg += f'\n<b>Thư mục con: </b><code>{folders}</code>'
-                msg += f'\n<b>Các tập tin: </b><code>{files}</code>'
+                msg += f'\n<b>SubFolders: </b><code>{folders}</code>'
+                msg += f'\n<b>Files: </b><code>{files}</code>'
             else:
                 msg += f'\n<b>Type: </b><code>{typ}</code>'
             buttons = button_build.ButtonMaker()
@@ -235,8 +236,15 @@ def _mirror(bot, update, isTar=False, extract=False):
     mesg = update.message.text.split('\n')
     message_args = mesg[0].split(' ')
     name_args = mesg[0].split('|')
+    qbit = False
+    qbitsel = False
     try:
         link = message_args[1]
+        if link == "qb" or link == "qbs":
+            qbit = True
+            if link == "qbs":
+                qbitsel = True
+            link = message_args[2]
         print(link)
         if link.startswith("|") or link.startswith("pswd: "):
             link = ''
@@ -281,15 +289,17 @@ def _mirror(bot, update, isTar=False, extract=False):
                     tg_downloader = TelegramDownloadHelper(listener)
                     ms = update.message
                     tg_downloader.add_download(ms, f'{DOWNLOAD_DIR}{listener.uid}/', name)
-                    if len(Interval) == 0:
-                        Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
                     return
                 else:
-                    link = file.get_file().file_path
+                    if qbit:
+                        file.get_file().download(custom_path=f"/usr/src/app/{file.file_name}")
+                        link = f"/usr/src/app/{file.file_name}"
+                    else:
+                        link = file.get_file().file_path
     else:
         tag = None
     if not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
-        sendMessage('Không có nguồn tải xuống được cung cấp', bot, update)
+        sendMessage('No download source provided', bot, update)
         return
 
     try:
@@ -333,8 +343,6 @@ def _mirror(bot, update, isTar=False, extract=False):
         download_status = DownloadStatus(drive, size, listener, gid)
         with download_dict_lock:
             download_dict[listener.uid] = download_status
-        if len(Interval) == 0:
-            Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
         sendStatusMessage(update, bot)
         drive.download(link)
 
@@ -347,11 +355,14 @@ def _mirror(bot, update, isTar=False, extract=False):
         else:
             mega_dl = MegaDownloadHelper()
             mega_dl.add_download(link, f'{DOWNLOAD_DIR}/{listener.uid}/', listener)
+
+    elif qbit and (bot_utils.is_magnet(link) or os.path.exists(link)):
+        qbit = qbittorrent()
+        qbit.add_torrent(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, qbitsel)
+
     else:
         ariaDlManager.add_download(link, f'{DOWNLOAD_DIR}/{listener.uid}/', listener, name)
         sendStatusMessage(update, bot)
-    if len(Interval) == 0:
-        Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
 
 
 def mirror(update, context):

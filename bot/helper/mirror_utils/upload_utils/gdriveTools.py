@@ -117,7 +117,7 @@ class GoogleDriveHelper:
                                      resumable=False)
         file_metadata = {
             'name': file_name,
-            'description': 'Uploaded using Slam Tg Mirror Bot',
+            'description': 'Uploaded Ciara',
             'mimeType': mime_type,
         }
         if parent_id is not None:
@@ -128,7 +128,7 @@ class GoogleDriveHelper:
         try:
             file_id = self.getIdFromUrl(link)
         except (KeyError,IndexError):
-            msg = "Google Drive ID could not be found in the provided link"
+            msg = "Không tìm thấy ID Google Drive trong liên kết được cung cấp"
             return msg
         msg = ''
         try:
@@ -171,7 +171,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             'name': file_name,
-            'description': 'Uploaded by Slam Tg Mirror Bot',
+            'description': 'Uploaded by Ciara',
             'mimeType': mime_type,
         }
         try:
@@ -363,7 +363,7 @@ class GoogleDriveHelper:
         try:
             file_id = self.getIdFromUrl(link)
         except (KeyError,IndexError):
-            msg = "Google Drive ID could not be found in the provided link"
+            msg = "Không tìm thấy ID Google Drive trong liên kết được cung cấp"
             return msg
         msg = ""
         LOGGER.info(f"File ID: {file_id}")
@@ -378,10 +378,10 @@ class GoogleDriveHelper:
                     msg = self.deletefile(durl)
                     LOGGER.info(f"{msg}")
                     return "your clone has been stopped and cloned data has been deleted!", "cancelled"
-                msg += f'<b>Filename: </b><code>{meta.get("name")}</code>\n<b>Size: </b><code>{get_readable_file_size(self.transferred_size)}</code>'
-                msg += f'\n<b>Type: </b><code>Folder</code>'
-                msg += f'\n<b>SubFolders: </b><code>{self.total_folders}</code>'
-                msg += f'\n<b>Files: </b><code>{self.total_files}</code>'
+                msg += f'<b>Tên tệp: </b><code>{meta.get("name")}</code>\n<b>Size: </b><code>{get_readable_file_size(self.transferred_size)}</code>'
+                msg += f'\n<b>Thể loại: </b><code>Folder</code>'
+                msg += f'\n<b>Thư mục con: </b><code>{self.total_folders}</code>'
+                msg += f'\n<b>Các tập tin: </b><code>{self.total_files}</code>'
                 buttons = button_build.ButtonMaker()
                 if SHORTENER is not None and SHORTENER_API is not None:
                     surl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={durl}&format=text').text
@@ -557,9 +557,9 @@ class GoogleDriveHelper:
                     content += f'<b> | <a href="https://telegra.ph/{self.path[nxt_page]}">Next</a></b>'
                     nxt_page += 1
             Telegraph(access_token=telegraph_token).edit_page(path = self.path[prev_page],
-                                 title = 'Slam Tg Mirror Bot Search',
-                                 author_name='Slam Tg Mirror Bot',
-                                 author_url='https://github.com/breakdowns/slam-tg-mirror-bot',
+                                 title = 'M2D Search',
+                                 author_name='M2D',
+                                 author_url='https://t.me/joinchat/Ct505dpaO-gzNzJl',
                                  html_content=content)
         return
 
@@ -638,13 +638,13 @@ class GoogleDriveHelper:
                 self.telegraph_content.append(msg)
 
             if len(self.telegraph_content) == 0:
-                return "No Result Found ❌", None
+                return "Không có kết quả nào ❌", None
 
             for content in self.telegraph_content :
                 self.path.append(Telegraph(access_token=telegraph_token).create_page(
-                                                        title = 'Slam Tg Mirror Bot Search',
-                                                        author_name='Slam Tg Mirror Bot',
-                                                        author_url='https://github.com/breakdowns/slam-tg-mirror-bot',
+                                                        title = 'M2D Search',
+                                                        author_name='M2D',
+                                                        author_url='https://t.me/joinchat/Ct505dpaO-gzNzJl',
                                                         html_content=content
                                                         )['path'])
 
@@ -665,7 +665,7 @@ class GoogleDriveHelper:
         try:
             file_id = self.getIdFromUrl(link)
         except (KeyError,IndexError):
-            msg = "Google Drive ID could not be found in the provided link"
+            msg = "Không tìm thấy ID Google Drive trong liên kết được cung cấp"
             return msg
         msg = ""
         LOGGER.info(f"File ID: {file_id}")
@@ -676,13 +676,13 @@ class GoogleDriveHelper:
             LOGGER.info(f"Counting: {name}")
             if drive_file['mimeType'] == self.__G_DRIVE_DIR_MIME_TYPE:
                 self.gDrive_directory(**drive_file)
-                msg += f'<b>Filename: </b><code>{name}</code>'
-                msg += f'\n<b>Size: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
-                msg += f'\n<b>Type: </b><code>Folder</code>'
-                msg += f'\n<b>SubFolders: </b><code>{self.total_folders}</code>'
-                msg += f'\n<b>Files: </b><code>{self.total_files}</code>'
+                msg += f'<b>Tên tệp: </b><code>{name}</code>'
+                msg += f'\n<b>Kích thước: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
+                msg += f'\n<b>Thể loại: </b><code>Folder</code>'
+                msg += f'\n<b>Thư mục con: </b><code>{self.total_folders}</code>'
+                msg += f'\n<b>Các tập tin: </b><code>{self.total_files}</code>'
             else:
-                msg += f'<b>Filename: </b><code>{name}</code>'
+                msg += f'<b>Tên tệp: </b><code>{name}</code>'
                 try:
                     typee = drive_file['mimeType']
                 except:
@@ -690,16 +690,16 @@ class GoogleDriveHelper:
                 try:
                     self.total_files += 1
                     self.gDrive_file(**drive_file)
-                    msg += f'\n<b>Size: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
-                    msg += f'\n<b>Type: </b><code>{typee}</code>'
-                    msg += f'\n<b>Files: </b><code>{self.total_files}</code>'
+                    msg += f'\n<b>Kích thước: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
+                    msg += f'\n<b>Thể loại: </b><code>{typee}</code>'
+                    msg += f'\n<b>Các tập tin: </b><code>{self.total_files}</code>'
                 except TypeError:
                     pass
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
             if "File not found" in str(err):
-                msg = "File not found."
+                msg = "Không tìm thấy tệp."
             else:
                 msg = f"Error.\n{err}"
             return msg
@@ -728,7 +728,7 @@ class GoogleDriveHelper:
         try:
             file_id = self.getIdFromUrl(link)
         except (KeyError,IndexError):
-            msg = "Google Drive ID could not be found in the provided link"
+            msg = "Không tìm thấy ID Google Drive trong liên kết được cung cấp"
             return msg, "", ""
         LOGGER.info(f"File ID: {file_id}")
         try:
@@ -750,7 +750,7 @@ class GoogleDriveHelper:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
             if "File not found" in str(err):
-                msg = "File not found."
+                msg = "Không tìm thấy tệp."
             else:
                 msg = f"Error.\n{err}"
             return msg, "", "", ""
@@ -774,7 +774,7 @@ class GoogleDriveHelper:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
             if "downloadQuotaExceeded" in str(err):
-                err = "Download Quota Exceeded."
+                err = "Đã vượt quá hạn ngạch tải xuống."
             self.__listener.onDownloadError(err)
             return
         finally:
@@ -860,7 +860,7 @@ class GoogleDriveHelper:
         self.is_cancelled = True
         if self.is_downloading:
             LOGGER.info(f"Cancelling Download: {self.name}")
-            self.__listener.onDownloadError('Download stopped by user!')
+            self.__listener.onDownloadError('Người dùng đã dừng tải xuống!')
         elif self.is_cloning:
             LOGGER.info(f"Cancelling Clone: {self.name}")
         elif self.is_uploading:

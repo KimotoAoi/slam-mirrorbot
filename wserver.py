@@ -36,7 +36,7 @@ p { font-size: 12px; margin: 24px;}
 </style>
 </head>
 <body>
-<h1>slam-tg-mirror-bot: <a href="https://github.com/breakdowns/slam-tg-mirror-bot">@Github</a></h1>
+<h1>M2D: <a href="https://t.me/joinchat/Ct505dpaO-gzNzJl">@Telegram</a></h1>
 <form action="{form_url}" method="POST">
 
 {My_content}
@@ -109,7 +109,7 @@ code_page = """
 <head>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 <title>
-Slam Torrent Files
+M2D Torrent Files
 </title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -129,7 +129,7 @@ Slam Torrent Files
 """
 
 
-@routes.get('/slam/files/{hash_id}')
+@routes.get('/m2d/files/{hash_id}')
 async def list_torrent_contents(request):
 
     torr = request.match_info["hash_id"]
@@ -137,7 +137,7 @@ async def list_torrent_contents(request):
     gets = request.query
 
     if not "pin_code" in gets.keys():
-        rend_page = code_page.replace("{form_url}",f"/slam/files/{torr}")
+        rend_page = code_page.replace("{form_url}",f"/m2d/files/{torr}")
         return web.Response(text=rend_page,content_type='text/html')
 
     
@@ -168,7 +168,7 @@ async def list_torrent_contents(request):
     nodes.create_list(par,cont)
 
     rend_page = page.replace("{My_content}",cont[0])
-    rend_page = rend_page.replace("{form_url}",f"/slam/files/{torr}?pin_code={pincode}")
+    rend_page = rend_page.replace("{form_url}",f"/m2d/files/{torr}?pin_code={pincode}")
     client.auth_log_out()
     return web.Response(text=rend_page,content_type='text/html')
     
@@ -228,7 +228,7 @@ async def re_verfiy(paused, resumed, client, torr):
 
 
 
-@routes.post('/slam/files/{hash_id}')
+@routes.post('/m2d/files/{hash_id}')
 async def set_priority(request):
 
     torr = request.match_info["hash_id"]
@@ -277,7 +277,7 @@ async def set_priority(request):
 @routes.get('/')
 async def homepage(request):
 
-    return web.Response(text="<h1>See slam-tg-mirror-bot <a href='https://github.com/breakdowns/slam-tg-mirror-bot'>@GitHub</a> By <a href='https://github.com/breakdowns'>Breakdowns</a></h1>",content_type="text/html")
+    return web.Response(text="<h1>M2D <a href='https://t.me/joinchat/Ct505dpaO-gzNzJl'>@Telegram</a> By <a href='https://t.me/joinchat/Ct505dpaO-gzNzJl'>Ciara</a></h1>",content_type="text/html")
 
 async def e404_middleware(app, handler):
 
@@ -286,11 +286,11 @@ async def e404_middleware(app, handler):
       try:
           response = await handler(request)
           if response.status == 404:
-              return web.Response(text="<h1>404: Page not found</h2><br><h3>Slam</h3>",content_type="text/html")
+              return web.Response(text="<h1>404: Page not found</h2><br><h3>m2d</h3>",content_type="text/html")
           return response
       except web.HTTPException as ex:
           if ex.status == 404:
-              return web.Response(text="<h1>404: Page not found</h2><br><h3>Slam</h3>",content_type="text/html")
+              return web.Response(text="<h1>404: Page not found</h2><br><h3>m2d</h3>",content_type="text/html")
           raise
   return middleware_handler
 

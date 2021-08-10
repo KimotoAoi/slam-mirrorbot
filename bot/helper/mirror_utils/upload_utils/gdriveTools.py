@@ -730,7 +730,7 @@ class GoogleDriveHelper:
             file_id = self.getIdFromUrl(link)
         except (KeyError,IndexError):
             msg = "Không tìm thấy ID Google Drive trong liên kết được cung cấp"
-            return msg, "", ""
+            return msg, "", "", ""
         LOGGER.info(f"File ID: {file_id}")
         try:
             drive_file = self.__service.files().get(fileId=file_id, fields="id, name, mimeType, size",

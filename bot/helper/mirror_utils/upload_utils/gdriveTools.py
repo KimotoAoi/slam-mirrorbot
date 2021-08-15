@@ -117,7 +117,7 @@ class GoogleDriveHelper:
                                      resumable=False)
         file_metadata = {
             'name': file_name,
-            'description': 'Uploaded by Ciara',
+            'description': 'Uploaded using Slam Mirrorbot',
             'mimeType': mime_type,
         }
         if parent_id is not None:
@@ -171,7 +171,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             'name': file_name,
-            'description': 'Uploaded by Ciara',
+            'description': 'Uploaded by Slam Mirrorbot',
             'mimeType': mime_type,
         }
         try:
@@ -513,7 +513,7 @@ class GoogleDriveHelper:
                 if not file_name.endswith(".!qB"):
                     self.upload_file(current_file_name, file_name, mime_type, parent_id)
                     self.total_files += 1
-                    new_id = parent_id
+                new_id = parent_id
             if self.is_cancelled:
                 break
         return new_id
@@ -558,9 +558,9 @@ class GoogleDriveHelper:
                     content += f'<b> | <a href="https://telegra.ph/{self.path[nxt_page]}">Next</a></b>'
                     nxt_page += 1
             Telegraph(access_token=telegraph_token).edit_page(path = self.path[prev_page],
-                                 title = 'M2D',
-                                 author_name='M2D',
-                                 author_url='https://t.me/joinchat/Ct505dpaO-gzNzJl',
+                                 title = 'Slam Mirrorbot Search',
+                                 author_name='Slam Mirrorbot',
+                                 author_url='https://github.com/breakdowns/slam-mirrorbot',
                                  html_content=content)
         return
 
@@ -643,9 +643,9 @@ class GoogleDriveHelper:
 
             for content in self.telegraph_content :
                 self.path.append(Telegraph(access_token=telegraph_token).create_page(
-                                                        title = 'M2D',
-                                                        author_name='M2D',
-                                                        author_url='https://t.me/joinchat/Ct505dpaO-gzNzJl',
+                                                        title = 'Slam Mirrorbot Search',
+                                                        author_name='Slam Mirrorbot',
+                                                        author_url='https://github.com/breakdowns/slam-mirrorbot',
                                                         html_content=content
                                                         )['path'])
 

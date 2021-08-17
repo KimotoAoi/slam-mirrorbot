@@ -64,7 +64,7 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 
 
 def restart(update, context):
-    restart_message = sendMessage("Đang khởi động lại, xin vui lòng chờ!", context.bot, update)
+    restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
     # Save restart message object in order to reply to it after restarting
     with open(".restartmsg", "w") as f:
         f.truncate(0)
@@ -91,6 +91,8 @@ def bot_help(update, context):
 /{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
 
 /{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
+
+/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
 
 /{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
 
@@ -144,33 +146,35 @@ def bot_help(update, context):
 '''
 
     help_string = f'''
-/{BotCommands.HelpCommand}: Để nhận được tin nhắn này
+/{BotCommands.HelpCommand}: To get this message
 
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Bắt đầu phản chiếu liên kết tới Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
+/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
 
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Bắt đầu phản chiếu và .tar trước khi tải lên Drive
+/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
 
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Bắt đầu phản chiếu và nếu tệp đã tải xuống là bất kỳ tệp lưu trữ nào, tệp đó sẽ được giải nén vào Google Drive
+/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
 
-/{BotCommands.CloneCommand} [drive_url]: Sao chép tệp/thư mục vào Google Drive
+/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
 
-/{BotCommands.CountCommand} [drive_url]: Đếm tệp/thư mục của Liên kết Google Drive
+/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive
 
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Phản chiếu qua youtube-dl. Nhấp /{BotCommands.WatchCommand} để được giúp đỡ nhiều hơn
+/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive Links
 
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Phản chiếu qua youtube-dl và tar trước khi tải lên
+/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help
 
-/{BotCommands.CancelMirror}: Trả lời tin nhắn mà quá trình tải xuống được bắt đầu và quá trình tải xuống đó sẽ bị huỷ
+/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
 
-/{BotCommands.ListCommand} [search term]: Tìm kiếm tệp trong Drive
+/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
 
-/{BotCommands.StatusCommand}: Hiển thị trạng thái của tất cả các bản tải xuống
+/{BotCommands.ListCommand} [search term]: Searches the search term in the Google Drive, If found replies with the link
 
-/{BotCommands.StatsCommand}: Hiển thị số liệu thống kê của bot
+/{BotCommands.StatusCommand}: Shows a status of all the downloads
 
-/{BotCommands.PingCommand}: Kiểm tra xem mất bao lâu để Ping the Bot
+/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
 
-/{BotCommands.TsHelpCommand}: Nhận trợ giúp cho mô-đun tìm kiếm Torrent
+/{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
+
+/{BotCommands.TsHelpCommand}: Get help for Torrent search module
 '''
 
     if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
@@ -180,24 +184,25 @@ def bot_help(update, context):
 
 
 botcmds = [
-        (f'{BotCommands.HelpCommand}','Nhận trợ giúp'),
-        (f'{BotCommands.MirrorCommand}', 'Bắt đầu phản chiếu'),
-        (f'{BotCommands.TarMirrorCommand}','Bắt đầu phản chiếu và tải lên dưới dạng .tar'),
-        (f'{BotCommands.UnzipMirrorCommand}','Giải nén tệp'),
-        (f'{BotCommands.CloneCommand}','Sao chép tệp/thư mục vào Drive'),
-        (f'{BotCommands.CountCommand}','Đếm tệp/thư mục của liên kết Drive'),
-        (f'{BotCommands.DeleteCommand}','Xóa tệp khỏi Drive'),
-        (f'{BotCommands.WatchCommand}','Liên kết hỗ trợ Mirror Youtube-dl'),
-        (f'{BotCommands.TarWatchCommand}','Phản chiếu liên kết danh sách phát trên Youtube dưới dạng .tar'),
-        (f'{BotCommands.CancelMirror}','Hủy nhiệm vụ'),
-        (f'{BotCommands.CancelAllCommand}','Hủy tất cả các nhiệm vụ'),
-        (f'{BotCommands.ListCommand}','Tìm kiếm tệp trong Drive'),
-        (f'{BotCommands.StatusCommand}','Nhận thông báo Trạng thái Phản chiếu'),
-        (f'{BotCommands.StatsCommand}','Số liệu thống kê sử dụng bot'),
+        (f'{BotCommands.HelpCommand}','Get Detailed Help'),
+        (f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
+        (f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
+        (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
+        (f'{BotCommands.ZipMirrorCommand}','Start mirroring and upload as .zip'),
+        (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+        (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
+        (f'{BotCommands.DeleteCommand}','Delete file from Drive'),
+        (f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
+        (f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as .tar'),
+        (f'{BotCommands.CancelMirror}','Cancel a task'),
+        (f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
+        (f'{BotCommands.ListCommand}','Searches files in Drive'),
+        (f'{BotCommands.StatusCommand}','Get Mirror Status message'),
+        (f'{BotCommands.StatsCommand}','Bot Usage Stats'),
         (f'{BotCommands.PingCommand}','Ping the Bot'),
-        (f'{BotCommands.RestartCommand}','Khởi động lại bot [chỉ chủ sở hữu/sudo]'),
-        (f'{BotCommands.LogCommand}','Nhận Nhật ký Bot [chỉ chủ sở hữu/sudo]'),
-        (f'{BotCommands.TsHelpCommand}','Nhận trợ giúp cho mô-đun tìm kiếm Torrent')
+        (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
+        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
     ]
 
 
@@ -211,7 +216,7 @@ def main():
     if os.path.isfile(".restartmsg"):
         with open(".restartmsg") as f:
             chat_id, msg_id = map(int, f)
-        bot.edit_message_text("Khởi động lại thành công!", chat_id, msg_id)
+        bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
     bot.set_my_commands(botcmds)
 

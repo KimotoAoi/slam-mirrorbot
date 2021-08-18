@@ -73,43 +73,46 @@ class qbittorrent:
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=14))
             with download_dict_lock:
                 download_dict[listener.uid] = QbDownloadStatus(gid, listener, self.ext_hash, self.client)
-            self.updater = setInterval(self.update_interval, self.update)
             tor_info = tor_info[0]
             LOGGER.info(f"QbitDownload started: {tor_info.name}")
+            self.updater = setInterval(self.update_interval, self.update)
             if BASE_URL is not None and qbitsel:
-                if not is_file and (tor_info.state == "checkingResumeData" or tor_info.state == "metaDL"):
-                    meta = sendMessage("Đang tải xuống Siêu dữ liệu ... Vui lòng đợi sau đó bạn có thể chọn tệp hoặc nhân bản tệp torrent nếu nó có bộ phân tích thấp", listener.bot, listener.update)
+                if is_file:
+                    self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                else:
+                    meta = sendMessage("Downloading Metadata...Please wait then you can select files or mirror torrent file if it have low seeders", listener.bot, listener.update)
                     while True:
                             tor_info = self.client.torrents_info(torrent_hashes=self.ext_hash)
                             if len(tor_info) == 0:
                                 deleteMessage(listener.bot, meta)
                                 return False
-                            tor_info = tor_info[0]
-                            if tor_info.state == "metaDL" or tor_info.state == "checkingResumeData":
-                                time.sleep(1)
-                            else:
-                                break
-                    deleteMessage(listener.bot, meta)
-                self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                            try:
+                                tor_info = tor_info[0]
+                                if tor_info.state == "metaDL" or tor_info.state == "checkingResumeData":
+                                    time.sleep(0.5)
+                                else:
+                                    self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                                    deleteMessage(listener.bot, meta)
+                                    break
+                            except:
+                                deleteMessage(listener.bot, meta)
+                                return False
                 for n in str(self.ext_hash):
                     if n.isdigit():
                         pincode += str(n)
                         count += 1
                     if count == 4:
                         break
-                URL = f"{BASE_URL}/m2d/files/{self.ext_hash}"
+                URL = f"{BASE_URL}/slam/files/{self.ext_hash}"
                 pindata = f"pin {gid} {pincode}"
                 donedata = f"done {gid} {self.ext_hash}"
                 buttons = button_build.ButtonMaker()
-                buttons.buildbutton("Chọn tệp tin", URL)
+                buttons.buildbutton("Select Files", URL)
                 buttons.sbutton("Pincode", pindata)
-                buttons.sbutton("Chọn xong", donedata)
+                buttons.sbutton("Done Selecting", donedata)
                 QBBUTTONS = InlineKeyboardMarkup(buttons.build_menu(2))
-                msg = "Quá trình tải xuống của bạn đã bị tạm dừng. Chọn tệp rồi nhấn nút Chọn xong để bắt đầu tải xuống.."
-                markup = sendMarkup(msg, listener.bot, listener.update, QBBUTTONS)
-                with download_dict_lock:
-                    download = download_dict[listener.uid]
-                    download.markup = markup
+                msg = "Your download paused. Choose files then press Done Selecting button to start downloading."
+                sendMarkup(msg, listener.bot, listener.update, QBBUTTONS)
             else:
                 sendStatusMessage(listener.update, listener.bot)
         except qba.UnsupportedMediaType415Error as e:
@@ -126,54 +129,56 @@ class qbittorrent:
         if len(tor_info) == 0:
             self.updater.cancel()
             return
-        else:
+        try:
             tor_info = tor_info[0]
-        if tor_info.state == "metaDL":
-            self.stalled_time = time.time()
-            if time.time() - self.meta_time >= 600:
-                self.listener.onDownloadError("Dead Torrent!")
-                self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
-                self.updater.cancel()
-                return
-        elif tor_info.state == "downloading":
-            self.stalled_time = time.time()
-            if (TORRENT_DIRECT_LIMIT is not None or TAR_UNZIP_LIMIT is not None) and not self.checked:
-                if self.listener.isTar or self.listener.extract:
-                    is_tar_ext = True
-                    mssg = f'Tar/Unzip limit is {TAR_UNZIP_LIMIT}'
-                else:
-                    is_tar_ext = False
-                    mssg = f'Torrent/Direct limit is {TORRENT_DIRECT_LIMIT}'
-                size = tor_info.size
-                result = check_limit(size, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT, is_tar_ext)
-                self.checked = True
-                if result:
-                    self.listener.onDownloadError(f"{mssg}.\nYour File/Folder size is {get_readable_file_size(size)}")
+            if tor_info.state == "metaDL":
+                self.stalled_time = time.time()
+                if time.time() - self.meta_time >= 600:
+                    self.listener.onDownloadError("Dead Torrent!")
                     self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
                     self.updater.cancel()
                     return
-        elif tor_info.state == "stalledDL":
-            if time.time() - self.stalled_time >= 900:
-                self.listener.onDownloadError("Dead Torrent!")
+            elif tor_info.state == "downloading":
+                self.stalled_time = time.time()
+                if (TORRENT_DIRECT_LIMIT is not None or TAR_UNZIP_LIMIT is not None) and not self.checked:
+                    if self.listener.isTar or self.listener.extract:
+                        is_tar_ext = True
+                        mssg = f'Tar/Unzip limit is {TAR_UNZIP_LIMIT}'
+                    else:
+                        is_tar_ext = False
+                        mssg = f'Torrent/Direct limit is {TORRENT_DIRECT_LIMIT}'
+                    size = tor_info.size
+                    result = check_limit(size, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT, is_tar_ext)
+                    self.checked = True
+                    if result:
+                        self.listener.onDownloadError(f"{mssg}.\nYour File/Folder size is {get_readable_file_size(size)}")
+                        self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
+                        self.updater.cancel()
+                        return
+            elif tor_info.state == "stalledDL":
+                if time.time() - self.stalled_time >= 900:
+                    self.listener.onDownloadError("Dead Torrent!")
+                    self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
+                    self.updater.cancel()
+                    return
+            elif tor_info.state == "error":
+                self.listener.onDownloadError("Error. IDK why, report in support group")
                 self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
                 self.updater.cancel()
                 return
-        elif tor_info.state == "error":
-            self.listener.onDownloadError("Error. IDK why, report in support group")
-            self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
-            self.updater.cancel()
-            return
-        elif tor_info.state == "uploading" or tor_info.state.lower().endswith("up"):
-            self.client.torrents_pause(torrent_hashes=self.ext_hash)
-            if self.qbitsel:
-                for dirpath, subdir, files in os.walk(f"{self.dire}", topdown=False):
-                    for file in files:
-                        if fnmatch(file, "*.!qB"):
-                            os.remove(os.path.join(dirpath, file))
-                    if not os.listdir(dirpath):
-                        os.rmdir(dirpath)
-            self.listener.onDownloadComplete()
-            self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
+            elif tor_info.state == "uploading" or tor_info.state.lower().endswith("up"):
+                self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                if self.qbitsel:
+                    for dirpath, subdir, files in os.walk(f"{self.dire}", topdown=False):
+                        for file in files:
+                            if fnmatch(file, "*.!qB"):
+                                os.remove(os.path.join(dirpath, file))
+                        if not os.listdir(dirpath):
+                            os.rmdir(dirpath)
+                self.listener.onDownloadComplete()
+                self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
+                self.updater.cancel()
+        except:
             self.updater.cancel()
 
 
@@ -193,10 +198,10 @@ def get_confirm(update, context):
             query.answer()
             qdl.client.torrents_resume(torrent_hashes=data[2])
             sendStatusMessage(qdl.listener.update, qdl.listener.bot)
-            deleteMessage(context.bot, qdl.markup)
+            query.message.delete()
     else:
         query.answer(text="This task has been cancelled!", show_alert=True)
-        query.delete_message()
+        query.message.delete()
 
 
 def get_hash_magnet(mgt):

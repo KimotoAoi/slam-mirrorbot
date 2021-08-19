@@ -193,7 +193,7 @@ input[type="submit"]:hover, input[type="submit"]:focus{
 </style>
 </head>
 <body>
-  <!--© M2D Telegram-->
+  <!--© Designed and coded by @bipuldey19-Telegram-->
     <header>
       <div class="brand">
         <img
@@ -205,8 +205,8 @@ input[type="submit"]:hover, input[type="submit"]:focus{
         </a>
       </div>
       <div class="social">
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="M2D"></i></a>
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="M2D"></i></a>
+        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
+        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -518,11 +518,11 @@ section span{
     </style>
   </head>
 <body>
-   <!--© M2D Telegram-->
+   <!--© Designed and coded by @bipuldey19-Telegram-->
     <header>
       <div class="brand">
         <img
-          src="https://telegra.ph/file/010c77496dc7b045e0aca.jpg"
+          src="https://telegra.ph/file/6507910fd06d18dfaba82.jpg"
           alt="logo"
         />
         <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1">
@@ -530,8 +530,8 @@ section span{
         </a>
       </div>
       <div class="social">
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="M2D"></i></a>
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="M2D"></i></a>
+        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
+        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -704,7 +704,7 @@ async def set_priority(request):
 @routes.get('/')
 async def homepage(request):
 
-    return web.Response(text="<h1>See m2d-mirrorbot <a href='https://t.me/joinchat/RqfwwoH2fetlOGY1'>@GitHub</a> By <a href='https://t.me/joinchat/RqfwwoH2fetlOGY1'>Ciara</a></h1>", content_type="text/html")
+    return web.Response(text="<h1>See M2D <a href='https://t.me/joinchat/RqfwwoH2fetlOGY1'>@Telegram</a> By <a href='http://t.me/XzxCiarazxZ'>Ciara</a></h1>", content_type="text/html")
 
 
 async def e404_middleware(app, handler):
@@ -714,7 +714,7 @@ async def e404_middleware(app, handler):
         try:
             response = await handler(request)
             if response.status == 404:
-                return web.Response(text="<h1>404: Page not found</h2><br><h3>M2D</h3>", content_type="text/html")
+                return web.Response(text="<h1>404: Page not found</h2><br><h3>M2X</h3>", content_type="text/html")
             return response
         except web.HTTPException as ex:
             if ex.status == 404:

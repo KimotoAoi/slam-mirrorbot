@@ -1,5 +1,5 @@
-# Implement By - @anasty17 (https://github.com/breakdowns/slam-mirrorbot/commit/0bfba523f095ab1dccad431d72561e0e002e7a59)
-# (c) https://github.com/breakdowns/slam-mirrorbot
+# Implement By - @anasty17 (https://github.com/SlamDevs/slam-mirrorbot/commit/0bfba523f095ab1dccad431d72561e0e002e7a59)
+# (c) https://github.com/SlamDevs/slam-mirrorbot
 # All rights reserved
 
 import os
@@ -78,9 +78,7 @@ class qbittorrent:
             LOGGER.info(f"QbitDownload started: {tor_info.name}")
             self.updater = setInterval(self.update_interval, self.update)
             if BASE_URL is not None and qbitsel:
-                if is_file:
-                    self.client.torrents_pause(torrent_hashes=self.ext_hash)
-                else:
+                if not is_file:
                     meta = sendMessage("Downloading Metadata...Please wait then you can select files or mirror torrent file if it have low seeders", listener.bot, listener.update)
                     while True:
                             tor_info = self.client.torrents_info(torrent_hashes=self.ext_hash)
@@ -92,12 +90,13 @@ class qbittorrent:
                                 if tor_info.state == "metaDL" or tor_info.state == "checkingResumeData":
                                     time.sleep(0.5)
                                 else:
-                                    self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                                    time.sleep(2)
                                     deleteMessage(listener.bot, meta)
                                     break
                             except:
                                 deleteMessage(listener.bot, meta)
                                 return False
+                self.client.torrents_pause(torrent_hashes=self.ext_hash)
                 for n in str(self.ext_hash):
                     if n.isdigit():
                         pincode += str(n)
@@ -134,7 +133,7 @@ class qbittorrent:
             tor_info = tor_info[0]
             if tor_info.state == "metaDL":
                 self.stalled_time = time.time()
-                if time.time() - self.meta_time >= 600:
+                if time.time() - self.meta_time >= 999999999: # timeout while downloading metadata
                     self.listener.onDownloadError("Dead Torrent!")
                     self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
                     self.updater.cancel()
@@ -157,7 +156,7 @@ class qbittorrent:
                         self.updater.cancel()
                         return
             elif tor_info.state == "stalledDL":
-                if time.time() - self.stalled_time >= 900:
+                if time.time() - self.stalled_time >= 999999999: # timeout after downloading metadata
                     self.listener.onDownloadError("Dead Torrent!")
                     self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
                     self.updater.cancel()

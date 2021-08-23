@@ -21,7 +21,7 @@ page = """
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Torrent File Selector</title>
-    <link rel="icon" href="https://telegra.ph/file/010c77496dc7b045e0aca.jpg" type="image/jpg">
+    <link rel="icon" href="https://telegra.ph/file/6507910fd06d18dfaba82.jpg" type="image/jpg">
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
@@ -197,16 +197,16 @@ input[type="submit"]:hover, input[type="submit"]:focus{
     <header>
       <div class="brand">
         <img
-          src="https://telegra.ph/file/010c77496dc7b045e0aca.jpg"
+          src="https://telegra.ph/file/6507910fd06d18dfaba82.jpg"
           alt="logo"
         />
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"> 
-          <h2 class="name">M2D</h2>
+        <a href="https://t.me/SlamMirrorUpdates"> 
+          <h2 class="name">slam-mirrorbot</h2>
         </a>
       </div>
       <div class="social">
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
+        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -525,13 +525,13 @@ section span{
           src="https://telegra.ph/file/6507910fd06d18dfaba82.jpg"
           alt="logo"
         />
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1">
-          <h2 class="name">M2D</h2>
+        <a href="https://t.me/SlamMirrorUpdates">
+          <h2 class="name">slam-mirrorbot</h2>
         </a>
       </div>
       <div class="social">
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
-        <a href="https://t.me/joinchat/RqfwwoH2fetlOGY1"><i class="fab fa-telegram"></i></a>
+        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -541,7 +541,7 @@ section span{
           <input
             type="text"
             name="pin_code"
-            placeholder="Enter the code that you have got from telegram to access the torrent"
+            placeholder="Enter the code that you have got from Telegram to access the Torrent"
           />
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
@@ -696,7 +696,7 @@ async def set_priority(request):
 
     await asyncio.sleep(2)
     if not await re_verfiy(pause, resume, client, torr):
-        LOGGER.error("The torrent choose errored reverification failed")
+        LOGGER.error("The Torrent choose errored reverification failed")
     client.auth_log_out()
     return await list_torrent_contents(request)
 
@@ -704,7 +704,7 @@ async def set_priority(request):
 @routes.get('/')
 async def homepage(request):
 
-    return web.Response(text="<h1>See M2D <a href='https://t.me/joinchat/RqfwwoH2fetlOGY1'>@Telegram</a> By <a href='http://t.me/XzxCiarazxZ'>Ciara</a></h1>", content_type="text/html")
+    return web.Response(text="<h1>See slam-mirrorbot <a href='https://github.com/SlamDevs/slam-mirrorbot'>@GitHub</a> By <a href='https://github.com/SlamDevs'>SlamDevs</a></h1>", content_type="text/html")
 
 
 async def e404_middleware(app, handler):
@@ -714,11 +714,11 @@ async def e404_middleware(app, handler):
         try:
             response = await handler(request)
             if response.status == 404:
-                return web.Response(text="<h1>404: Page not found</h2><br><h3>M2X</h3>", content_type="text/html")
+                return web.Response(text="<h1>404: Page not found</h2><br><h3>slam-mirrorbot</h3>", content_type="text/html")
             return response
         except web.HTTPException as ex:
             if ex.status == 404:
-                return web.Response(text="<h1>404: Page not found</h2><br><h3>M2D</h3>", content_type="text/html")
+                return web.Response(text="<h1>404: Page not found</h2><br><h3>slam-mirrorbot</h3>", content_type="text/html")
             raise
     return middleware_handler
 

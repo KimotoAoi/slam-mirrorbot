@@ -174,7 +174,7 @@ class qbittorrent:
                     return
             elif tor_info.state == "error":
                 self.client.torrents_pause(torrent_hashes=self.ext_hash)
-                self.listener.onDownloadError("Error. IDK why, report in @SlamBugReport")
+                self.listener.onDownloadError("Error. IDK why")
                 self.client.torrents_delete(torrent_hashes=self.ext_hash)
                 self.client.auth_log_out()
                 self.updater.cancel()
